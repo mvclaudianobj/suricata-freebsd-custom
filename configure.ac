@@ -450,6 +450,18 @@
 
 # options
 
+    # enable alert-pf
+    AC_ARG_ENABLE([alert-pf],
+      AS_HELP_STRING([--enable-alert-pf], [Enable PF firewall alert output]),
+      [enable_alert_pf=$enableval], [enable_alert_pf=no])
+
+    if test "x$enable_alert_pf" = "xyes"; then
+      AC_CHECK_LIB([pfctl], [pfctl_table_add_addrs],
+        [AC_DEFINE([HAVE_ALERT_PF], [1], [Enable PF alert output])
+         LIBS="$LIBS -lpfctl"],
+        [AC_MSG_ERROR([libpfctl not found, cannot enable alert-pf])])
+    fi
+
 
   # enable the running of unit tests
     AC_ARG_ENABLE(unittests,

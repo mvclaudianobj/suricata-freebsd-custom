@@ -489,6 +489,7 @@ typedef enum {
     LOGGER_JSON_METADATA,
     LOGGER_JSON_FRAME,
     LOGGER_JSON_STREAM,
+    LOGGER_ALERT_PF,
     LOGGER_SIZE,
 } LoggerId;
 

@@ -42,6 +42,7 @@
 
 #include "alert-fastlog.h"
 #include "alert-debuglog.h"
+#include "alert-pf.h"
 #include "alert-syslog.h"
 #include "output-json.h"
 #include "output-json-alert.h"
@@ -1045,6 +1046,8 @@ void OutputRegisterLoggers(void)
     AlertFastLogRegister();
     /* debug log */
     AlertDebugLogRegister();
+    /* alert pf */
+    AlertPfRegister();
     /* syslog log */
     AlertSyslogRegister();
     JsonDropLogRegister();
