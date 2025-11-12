@@ -653,7 +653,7 @@ jobs:
       - run: llvm-profdata merge -o default.profdata $(find suricata-verify/tests/ -name '*.profraw')
       - run: llvm-cov show ./src/suricata -instr-profile=default.profdata --show-instantiations --ignore-filename-regex="^/root/.*" > coverage.txt
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@b9fd7d16f6d7d1b5d2bec1a2887e65ceed900238
+        uses: codecov/codecov-action@5a1091511ad55cbe89839c7260b706298ca349f7
         with:
           fail_ci_if_error: false
           flags: suricata-verify
@@ -1334,7 +1334,7 @@ jobs:
       - run: llvm-profdata-14 merge -o htp-test.profdata /tmp/htp-test.profraw
       - run: llvm-cov-14 show libhtp/test/test_all -instr-profile=htp-test.profdata --show-instantiations --ignore-filename-regex="^/root/.*" >> coverage.txt
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@b9fd7d16f6d7d1b5d2bec1a2887e65ceed900238
+        uses: codecov/codecov-action@5a1091511ad55cbe89839c7260b706298ca349f7
         with:
           fail_ci_if_error: false
           flags: unittests
@@ -1435,7 +1435,7 @@ jobs:
       - run: llvm-profdata-14 merge -o default.profdata $(find /tmp/ -name '*.profraw')
       - run: llvm-cov-14 show ./src/suricata -instr-profile=default.profdata --show-instantiations --ignore-filename-regex="^/root/.*" > coverage.txt
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@b9fd7d16f6d7d1b5d2bec1a2887e65ceed900238
+        uses: codecov/codecov-action@5a1091511ad55cbe89839c7260b706298ca349f7
         with:
           fail_ci_if_error: false
           flags: fuzzcorpus
