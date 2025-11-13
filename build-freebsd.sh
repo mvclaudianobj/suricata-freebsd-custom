@@ -1,10 +1,7 @@
 #!/bin/sh
 # ==========================================================
-# Suricata FreeBSD Custom Build Script with alert-pf support
+# Suricata FreeBSD Build Script - Versão LibHTP Corrigida
 # ==========================================================
-# Build otimizado com suporte a netmap, alert-pf, Rust e JA3/JA4
-# Autor: Marcos Claudiano
-# Sistema: FreeBSD 15+
 
 set -e
 
@@ -15,29 +12,47 @@ export CPPFLAGS="-I/usr/local/include -I./libpfctl/include"
 export RUSTFLAGS="-C opt-level=z -C panic=abort"
 
 # ==========================================================
-# 1. Compilar libpfctl local
+# 1. Compilar libhtp usando método correto
 # ==========================================================
-echo ">>> [1/5] Compilando libpfctl..."
-if [ -d "./libpfctl" ]; then
-  cd libpfctl
-  echo ">>> Gerando autotools da libpfctl..."
-  make clean all install
+echo ">>> [1/5] Compilando libhtp..."
+if [ -d "./libhtp" ]; then
+  cd libhtp
+  
+  # Método 1: Usar autogen.sh se existir
+  if [ -f "autogen.sh" ]; then
+    echo ">>> Executando autogen.sh..."
+    ./autogen.sh
+  else
+    # Método 2: Gerar arquivos manualmente
+    echo ">>> Gerando arquivos de configuração..."
+    aclocal
+    autoheader
+    automake --add-missing --copy
+    autoconf
+  fi
+  
+  echo ">>> Configurando libhtp..."
+  ./configure --prefix=/usr/local
+  
+  echo ">>> Compilando libhtp..."
+  make -j$(sysctl -n hw.ncpu)
+  
+  echo ">>> Instalando libhtp..."
+  make install
+  
   cd ..
+  echo "✅ libhtp compilado e instalado com sucesso!"
 else
-  echo "❌ Diretório libpfctl não encontrado!"
+  echo "❌ Diretório libhtp não encontrado!"
   exit 1
 fi
 
 # ==========================================================
-# 2. Gerar autotools do Suricata
+# 2. Configurar Suricata
 # ==========================================================
-echo ">>> [2/6] Gerando arquivos de configuração do Suricata..."
+echo ">>> [2/5] Configurando Suricata..."
 autoreconf -fi
 
-# ==========================================================
-# 3. Configurar build
-# ==========================================================
-echo ">>> [3/6] Configurando build do Suricata..."
 ./configure \
   --prefix=/usr/local \
   --sysconfdir=/usr/local/etc/suricata \
@@ -61,31 +76,28 @@ echo ">>> [3/6] Configurando build do Suricata..."
   --enable-netmap
 
 # ==========================================================
-# 4. Compilar e instalar Suricata
+# 3. Compilar Suricata
 # ==========================================================
-echo ">>> [4/6] Compilando Suricata..."
+echo ">>> [3/5] Compilando Suricata..."
 make -j$(sysctl -n hw.ncpu)
+
+# ==========================================================
+# 4. Instalar Suricata
+# ==========================================================
+echo ">>> [4/5] Instalando Suricata..."
 make install
 
 # ==========================================================
-# 5. Verificação final
+# 5. Verificação
 # ==========================================================
-echo ">>> [5/6] Verificação final..."
-if strings "$(which suricata)" | grep -q "alert-pf"; then
-  echo "✅ Compilação concluída com suporte a alert-pf!"
+echo ">>> [5/5] Verificando instalação..."
+if suricata --build-info >/dev/null 2>&1; then
+  echo "✅ Suricata instalado com sucesso!"
+  echo ">>> Compatibilidade SIMD:"
+  suricata --build-info | grep "SIMD support"
 else
-  echo "⚠️  Compilação concluída, mas alert-pf não encontrado!"
+  echo "❌ Falha na instalação do Suricata"
+  exit 1
 fi
 
-# ==========================================================
-# 6. Pós-build: geração de pacote
-# ==========================================================
-echo ">>> [6/6] Executando script de pós-build..."
-if [ -x "./script_pos_build_suricata.sh" ]; then
-  ./script_pos_build_suricata.sh
-  echo "📦 Pacote gerado com sucesso!"
-else
-  echo "⚠️  script_pos_build_suricata.sh não encontrado ou sem permissão de execução!"
-fi
-
-echo "✅ Processo de build completo!"
+echo "🎉 Build concluído com sucesso!"
